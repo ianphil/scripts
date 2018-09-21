@@ -1,0 +1,22 @@
+groups=$(az group list --tag Remove=yes --query [].name --output tsv)
+for rg in $groups
+do
+    az group delete --name $rg --yes
+done
+
+az group update -n AfroDev --set tags.Remove=no
+az group update -n dns_zones --set tags.Remove=no
+az group update -n GeneralStore --set tags.Remove=no
+az group update -n nextcloudrg --set tags.Remove=yes
+az group update -n nextcloudrg1 --set tags.Remove=yes
+
+az group list --tag Remove=no --query [].name --output tsv
+
+allGroups=$(az group list --query [].name --output tsv)
+keepGroups=$(az group list --tag Remove=no --query [].name --output tsv)
+removeGroups=$(echo "$allGroups" | grep -v "$keepGroups")
+
+for rg in $removeGroups
+do
+    az group delete --name $rg --yes
+done
